@@ -3,11 +3,12 @@ import cors from 'cors';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import joi from 'joi';
+import dayjs from 'dayjs';
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-dotenv.config();
 
 const mongoClient = new MongoClient(process.env.MONGO_URI);
 
@@ -19,7 +20,18 @@ try {
 }
 
 let db = mongoClient.db("batepapouol");
+
 const collectionParticipants = db.collection("participants");
+
+const collectionMessages = db.collection("messages");
+
+let date;
+
+setInterval(() => {
+    date = dayjs().locale("pt-br").format("HH:mm:ss");
+}, 1000);
+
+// PARTICIPANTS ROUTES
 
 const schemaParticipant = joi.object({
     name: joi.string().required()
@@ -43,14 +55,36 @@ app.post("/participants", async (req, res) => {
             return;
         }
 
-        await collectionParticipants.insertOne({name, lastStatus: Date.now()});
+        await collectionParticipants.insertOne({
+            name, 
+            lastStatus: Date.now()
+        });
+
+        await collectionMessages.insertOne({
+            from: name,
+            to: "Todos",
+            text: "entra na sala...",
+            type: "status",
+            time: date
+        })
         res.sendStatus(201);
 
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
     }
-})
+});
+
+app.get("/participants", async (req, res) => {
+    try {
+        const userList = await collectionParticipants.find().toArray();
+        res.send(userList);
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
 
 app.listen(5000, () => {
     console.log("App is running in port: 5000");

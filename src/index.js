@@ -129,7 +129,24 @@ app.post("/messages", async (req, res) => {
     }
 });
 
+app.get("messages", async (req, res) => {
+    const { limit } = req.query;
+    const { user } = req.headers;
 
+    try {
+        const listMessages = await collectionMessages.find().toArray();
+
+        const filterMessages = listMessages.filter(value => value.type === "message" || value.type === "status" || (value.type === "private_message" && value.to === user));
+
+        if(!limit) {
+            return res.send(filterMessages);
+        }
+
+        res.send(filterMessages.slice(- limit));
+    } catch (error) {
+        res.sendStatus(500);
+    }
+});
 
 app.listen(5000, () => {
     console.log("App is running in port: 5000");

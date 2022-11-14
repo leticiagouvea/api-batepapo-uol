@@ -133,13 +133,18 @@ app.get("/messages", async (req, res) => {
     try {
         const listMessages = await collectionMessages.find().toArray();
 
-        const filterMessages = listMessages.filter(value => value.type === "message" || value.type === "status" || (value.type === "private_message" && value.to === user));
+        const filterMessages = listMessages.filter(value => 
+            value.type === "message" || 
+            value.type === "status" ||
+            (value.type === "private_message" && value.from === user) || 
+            (value.type === "private_message" && value.to === user));
 
         if(!limit) {
             return res.send(filterMessages);
         }
 
         res.send(filterMessages.slice(- limit));
+        
     } catch (error) {
         res.sendStatus(500);
     }

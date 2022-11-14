@@ -1,7 +1,6 @@
 {
   "name": "batepapo-uol-api",
   "version": "1.0.0",
-  "description": "",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -20,5 +19,14 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leticiagouvea/api-batepapouol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/leticiagouvea/api-batepapouol/issues"
+  },
+  "homepage": "https://github.com/leticiagouvea/api-batepapouol#readme",
+  "description": ""
 }

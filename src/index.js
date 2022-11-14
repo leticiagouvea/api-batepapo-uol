@@ -158,7 +158,7 @@ app.delete("/messages/:idMessage", async (req, res) => {
         const existingUser = await collectionParticipants.findOne({ name: user });
 
         if(!existingUser) {
-            return res.status(422).send("Usuário inexistente");
+            return res.sendStatus(401);
         }
 
         const existingIdMessage = await collectionMessages.findOne({
@@ -194,7 +194,7 @@ app.post("/status", async (req, res) => {
         const existingUser = await collectionParticipants.findOne({ name: user });
 
         if(!existingUser) {
-            return res.status(422).send("Usuário inexistente");
+            return res.sendStatus(404);
         }
 
         await collectionParticipants.updateOne({name: user}, {$set: statusUpdate});

@@ -177,7 +177,33 @@ app.delete("/messages/:idMessage", async (req, res) => {
         console.log(error);
         res.sendStatus(500);
     }
-})
+});
+
+// STATUS ROUTES
+
+app.post("/status", async (req, res) => {
+    const { user } = req.headers;
+    const statusUpdate = {
+        name: user,
+        lastStatus: Date.now()
+    }
+
+    try {
+        const existingUser = await collectionParticipants.findOne({ name: user });
+
+        if(!existingUser) {
+            return res.status(422).send("Usuário inexistente");
+        }
+
+        await collectionParticipants.updateOne({name: user}, {$set: statusUpdate});
+
+        res.sendStatus(200);
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
 
 app.listen(5000, () => {
     console.log("App is running in port: 5000");

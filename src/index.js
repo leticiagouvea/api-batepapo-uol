@@ -1,4 +1,4 @@
-import express, { text } from 'express';
+import express from 'express';
 import cors from 'cors';
 import { MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
@@ -43,16 +43,14 @@ app.post("/participants", async (req, res) => {
 
     if (validation.error) {
         const error = validation.error.details.map(detail => detail.message);
-        res.status(422).send(error);
-        return;
+        return res.status(422).send(error);
     }
 
     try {
         const existingUser = await collectionParticipants.findOne({ name });
 
         if(existingUser) {
-            res.status(409).send("Esse usuário já existe");
-            return;
+            return res.status(409).send("Esse usuário já existe");
         }
 
         await collectionParticipants.insertOne({
@@ -102,8 +100,7 @@ app.post("/messages", async (req, res) => {
 
     if (validation.error) {
         const error = validation.error.details.map(detail => detail.message);
-        res.status(422).send(error);
-        return;
+        return res.status(422).send(error);
     }
 
     try {
@@ -129,7 +126,7 @@ app.post("/messages", async (req, res) => {
     }
 });
 
-app.get("messages", async (req, res) => {
+app.get("/messages", async (req, res) => {
     const { limit } = req.query;
     const { user } = req.headers;
 
@@ -204,6 +201,28 @@ app.post("/status", async (req, res) => {
         res.sendStatus(500);
     }
 });
+
+setInterval(async () => {
+    const time = Date.now();
+
+    const userList = await collectionParticipants.find().toArray();
+
+    const inactiveUser = userList.filter(value => (time - value.lastStatus) > 10000);
+
+    if(inactiveUser.length > 0) {
+        const inactiveUserOut = inactiveUser.map(value => ({
+            from: value.name,
+            to: "Todos",
+            text: "sai da sala...",
+            type: "status",
+            time: date
+        }));
+
+        await collectionParticipants.deleteMany(inactiveUser.name);
+
+        await collectionMessages.insertMany(inactiveUserOut);
+    }
+}, 15000);
 
 app.listen(5000, () => {
     console.log("App is running in port: 5000");

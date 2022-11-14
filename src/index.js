@@ -1,6 +1,6 @@
 import express, { text } from 'express';
 import cors from 'cors';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 import joi from 'joi';
 import dayjs from 'dayjs';
@@ -147,6 +147,37 @@ app.get("messages", async (req, res) => {
         res.sendStatus(500);
     }
 });
+
+app.delete("/messages/:idMessage", async (req, res) => {
+    const { user } = req.headers;
+    const { idMessage } = req.params;
+
+    try {
+        const existingUser = await collectionParticipants.findOne({ name: user });
+
+        if(!existingUser) {
+            return res.status(422).send("Usuário inexistente");
+        }
+
+        const existingIdMessage = await collectionMessages.findOne({
+            _id: ObjectId(idMessage)
+        });
+
+        if(!existingIdMessage) {
+            return res.sendStatus(404);
+        }
+
+        const result = await collectionMessages.deleteOne({
+            _id: ObjectId(idMessage)
+        });
+
+        res.send(result);
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
 
 app.listen(5000, () => {
     console.log("App is running in port: 5000");
